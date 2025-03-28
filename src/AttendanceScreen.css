@@ -1,0 +1,194 @@
+.attendance-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+    font-family: Arial, sans-serif;
+  }
+  
+  .camera-section {
+    position: relative;
+    width: 400px;
+    height: 300px;
+    margin-bottom: 20px;
+  }
+  
+  .camera-feed {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+  }
+  
+  .recognition-frame {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    border: 2px solid #52c41a; /* Khung xanh khi nhận diện thành công */
+    border-radius: 10px;
+  }
+  
+  .status-section {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .status-section p {
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .support-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .retry-btn {
+    background-color: #1890ff;
+    color: white;
+  }
+  
+  .login-btn {
+    background-color: #fa8c16;
+    color: white;
+  }
+  
+  .contact-btn {
+    background-color: #f5222d;
+    color: white;
+  }
+  
+  .login-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+  }
+  
+  .submit-btn {
+    background-color: #52c41a;
+    color: white;
+    width: 100%;
+  }
+  
+  .close-btn {
+    background-color: #f5222d;
+    color: white;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .attendance-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Bắt đầu từ trên cùng khi xoay dọc */
+    height: 100vh;
+    width: 100vw;
+    background-color: #f0f2f5;
+    font-family: Arial, sans-serif;
+    transform: rotate(90deg); /* Xoay giao diện dọc */
+    transform-origin: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+  .camera-section {
+    position: relative;
+    width: 80vw; /* Tối ưu chiều rộng cho màn hình nhỏ */
+    height: 40vh; /* Giảm chiều cao để vừa màn dọc */
+    margin: 10px 0;
+  }
+  
+  .camera-feed {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+  }
+  
+  .recognition-frame {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    border: 2px solid #52c41a;
+    border-radius: 10px;
+  }
+  
+  .status-section p {
+    font-size: 14px; /* Giảm kích thước chữ cho màn nhỏ */
+    color: #333;
+    margin: 10px 0;
+  }
+  
+  .support-buttons {
+    display: flex;
+    flex-direction: column; /* Xếp dọc các nút */
+    gap: 5px;
+    width: 80%;
+  }
+  
+  button {
+    padding: 8px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .login-modal {
+    transform: rotate(90deg); /* Xoay modal theo màn hình */
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  .modal-content {
+    width: 70vw;
+    padding: 15px;
+  }
+  
+  .form-group input {
+    padding: 6px;
+    font-size: 14px;
+  }
