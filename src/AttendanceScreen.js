@@ -6,6 +6,7 @@ const AttendanceScreen = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [activeInput, setActiveInput] = useState(null);
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -48,6 +49,54 @@ const AttendanceScreen = () => {
     }
   };
 
+  const handleKeyPress = (key) => {
+    if (activeInput === 'username') {
+      if (key === 'Backspace') {
+        setUsername(username.slice(0, -1));
+      } else if (key === 'Space') {
+        setUsername(username + ' ');
+      } else {
+        setUsername(username + key);
+      }
+    } else if (activeInput === 'password') {
+      if (key === 'Backspace') {
+        setPassword(password.slice(0, -1));
+      } else if (key === 'Space') {
+        setPassword(password + ' ');
+      } else {
+        setPassword(password + key);
+      }
+    }
+  };
+
+  // Bàn phím ảo cải tiến
+  const VirtualKeyboard = () => {
+    const keys = [
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+      ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+      ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+      ['z', 'x', 'c', 'v', 'b', 'n', 'm', 'Space', 'Backspace']
+    ];
+
+    return (
+      <div className="virtual-keyboard">
+        {keys.map((row, rowIndex) => (
+          <div key={rowIndex} className="keyboard-row">
+            {row.map((key) => (
+              <button
+                key={key}
+                className={`keyboard-key ${key === 'Backspace' || key === 'Space' ? 'special-key' : ''}`}
+                onClick={() => handleKeyPress(key)}
+              >
+                {key === 'Backspace' ? '⌫' : key === 'Space' ? '␣' : key}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="attendance-container">
       <div className="camera-section">
@@ -58,9 +107,9 @@ const AttendanceScreen = () => {
         <p>{recognitionStatus}</p>
       </div>
       <div className="support-buttons">
-        <button onClick={handleRetry}>Thử lại</button>
-        <button onClick={() => setIsLoginModalOpen(true)}>Đăng nhập bằng tài khoản</button>
-        <button>Liên hệ quản lý</button>
+        <button className="retry-btn" onClick={handleRetry}>Thử lại</button>
+        <button className="login-btn" onClick={() => setIsLoginModalOpen(true)}>Đăng nhập bằng tài khoản</button>
+        <button className="contact-btn">Liên hệ quản lý</button>
       </div>
       {isLoginModalOpen && (
         <div className="login-modal">
@@ -72,6 +121,7 @@ const AttendanceScreen = () => {
                 <input
                   type="text"
                   value={username}
+                  onFocus={() => setActiveInput('username')}
                   onChange={(e) => setUsername(e.target.value)}
                   required
                 />
@@ -81,13 +131,15 @@ const AttendanceScreen = () => {
                 <input
                   type="password"
                   value={password}
+                  onFocus={() => setActiveInput('password')}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
-              <button type="submit">Đăng nhập</button>
-              <button type="button" onClick={() => setIsLoginModalOpen(false)}>Đóng</button>
+              <button type="submit" className="submit-btn">Đăng nhập</button>
+              <button type="button" className="close-btn" onClick={() => setIsLoginModalOpen(false)}>Đóng</button>
             </form>
+            {activeInput && <VirtualKeyboard />}
           </div>
         </div>
       )}
