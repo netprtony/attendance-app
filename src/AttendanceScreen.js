@@ -7,7 +7,13 @@ const AttendanceScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [activeInput, setActiveInput] = useState(null);
+  const [isRecognizing, setIsRecognizing] = useState(false); // Trạng thái nhận diện
+  const [frameClass, setFrameClass] = useState(''); // Lớp CSS cho khung nhận diện
   const videoRef = useRef(null);
+
+  // Âm thanh
+  // const successSound = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
+  // const failSound = new Audio('https://www.soundjay.com/buttons/beep-02.mp3');
 
   useEffect(() => {
     const startCamera = async () => {
@@ -20,13 +26,24 @@ const AttendanceScreen = () => {
     };
     startCamera();
 
+    // Giả lập nhận diện khuôn mặt
     const recognitionTimeout = setTimeout(() => {
-      const success = Math.random() > 0.3;
-      if (success) {
-        setRecognitionStatus(`Điểm danh thành công! Chào Nguyễn Văn A - ${new Date().toLocaleString()}`);
-      } else {
-        setRecognitionStatus('Không nhận diện được, vui lòng thử lại');
-      }
+      setIsRecognizing(true); // Hiển thị spinner
+      setTimeout(() => {
+        const success = Math.random() > 0.3;
+        if (success) {
+          setRecognitionStatus(`Điểm danh thành công! Chào Tâm Anh Solutions - ${new Date().toLocaleString()}`);
+          setFrameClass('success'); // Khung xanh đậm
+          // successSound.play(); // Phát âm thanh thành công
+        } else {
+          setRecognitionStatus('Không nhận diện được, vui lòng thử lại');
+          setFrameClass('fail'); // Khung đỏ
+          // failSound.play(); // Phát âm thanh thất bại
+        }
+        setIsRecognizing(false); // Tắt spinner
+        // Reset khung sau 1 giây
+        setTimeout(() => setFrameClass(''), 1000);
+      }, 2000);
     }, 2000);
 
     return () => clearTimeout(recognitionTimeout);
@@ -34,8 +51,20 @@ const AttendanceScreen = () => {
 
   const handleRetry = () => {
     setRecognitionStatus('Vui lòng nhìn vào camera để điểm danh');
+    setIsRecognizing(true);
     setTimeout(() => {
-      setRecognitionStatus(`Điểm danh thành công! Chào Nguyễn Văn A - ${new Date().toLocaleString()}`);
+      const success = Math.random() > 0.3;
+      if (success) {
+        setRecognitionStatus(`Điểm danh thành công! Chào Nguyễn Văn A - ${new Date().toLocaleString()}`);
+        setFrameClass('success');
+        // successSound.play();
+      } else {
+        setRecognitionStatus('Không nhận diện được, vui lòng thử lại');
+        setFrameClass('fail');
+        // failSound.play();
+      }
+      setIsRecognizing(false);
+      setTimeout(() => setFrameClass(''), 1000);
     }, 2000);
   };
 
@@ -69,7 +98,13 @@ const AttendanceScreen = () => {
     }
   };
 
-  // Bàn phím ảo cải tiến
+  const handleCloseModal = (e) => {
+    if (e.target.className === 'login-modal') {
+      setIsLoginModalOpen(false);
+      setActiveInput(null);
+    }
+  };
+
   const VirtualKeyboard = () => {
     const keys = [
       ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
@@ -101,7 +136,9 @@ const AttendanceScreen = () => {
     <div className="attendance-container">
       <div className="camera-section">
         <video ref={videoRef} autoPlay playsInline className="camera-feed" />
-        <div className="recognition-frame"></div>
+        <div className={`recognition-frame ${frameClass}`}>
+          {isRecognizing && <div className="spinner"></div>}
+        </div>
       </div>
       <div className="status-section">
         <p>{recognitionStatus}</p>
@@ -112,7 +149,7 @@ const AttendanceScreen = () => {
         <button className="contact-btn">Liên hệ quản lý</button>
       </div>
       {isLoginModalOpen && (
-        <div className="login-modal">
+        <div className="login-modal" onClick={handleCloseModal}>
           <div className="modal-content">
             <h3>Đăng nhập bằng tài khoản</h3>
             <form onSubmit={handleLoginSubmit}>
@@ -137,7 +174,6 @@ const AttendanceScreen = () => {
                 />
               </div>
               <button type="submit" className="submit-btn">Đăng nhập</button>
-              <button type="button" className="close-btn" onClick={() => setIsLoginModalOpen(false)}>Đóng</button>
             </form>
             {activeInput && <VirtualKeyboard />}
           </div>
