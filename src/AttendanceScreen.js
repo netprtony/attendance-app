@@ -2,18 +2,26 @@ import React, { useState, useRef, useEffect } from 'react';
 import './AttendanceScreen.css';
 
 const AttendanceScreen = () => {
-  const [recognitionStatus, setRecognitionStatus] = useState('Vui lòng nhìn vào camera để điểm danh');
+  const [recognitionStatus, setRecognitionStatus] = useState({
+    message: 'Vui lòng nhìn vào camera để điểm danh',
+    user: '',
+    timestamp: ''
+  });
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [activeInput, setActiveInput] = useState(null);
-  const [isRecognizing, setIsRecognizing] = useState(false); // Trạng thái nhận diện
-  const [frameClass, setFrameClass] = useState(''); // Lớp CSS cho khung nhận diện
+  const [employeeCode, setEmployeeCode] = useState('');
+  const [isRecognizing, setIsRecognizing] = useState(false);
+  const [frameClass, setFrameClass] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [highlight, setHighlight] = useState(false);
   const videoRef = useRef(null);
+  const inputRef = useRef(null);
 
-  // Âm thanh
-  // const successSound = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
-  // const failSound = new Audio('https://www.soundjay.com/buttons/beep-02.mp3');
+  useEffect(() => {
+    if (isLoginModalOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoginModalOpen]);
 
   useEffect(() => {
     const startCamera = async () => {
@@ -26,22 +34,26 @@ const AttendanceScreen = () => {
     };
     startCamera();
 
-    // Giả lập nhận diện khuôn mặt
     const recognitionTimeout = setTimeout(() => {
-      setIsRecognizing(true); // Hiển thị spinner
+      setIsRecognizing(true);
       setTimeout(() => {
         const success = Math.random() > 0.3;
         if (success) {
-          setRecognitionStatus(`Điểm danh thành công! Chào Tâm Anh Solutions - ${new Date().toLocaleString()}`);
-          setFrameClass('success'); // Khung xanh đậm
-          // successSound.play(); // Phát âm thanh thành công
+          setRecognitionStatus({
+            message: 'Điểm danh thành công!',
+            user: 'Tâm Anh Solutions',
+            timestamp: new Date().toLocaleString()
+          });
+          setFrameClass('success');
         } else {
-          setRecognitionStatus('Không nhận diện được, vui lòng thử lại');
-          setFrameClass('fail'); // Khung đỏ
-          // failSound.play(); // Phát âm thanh thất bại
+          setRecognitionStatus({
+            message: 'Không nhận diện được, vui lòng thử lại',
+            user: '',
+            timestamp: ''
+          });
+          setFrameClass('fail');
         }
-        setIsRecognizing(false); // Tắt spinner
-        // Reset khung sau 1 giây
+        setIsRecognizing(false);
         setTimeout(() => setFrameClass(''), 1000);
       }, 2000);
     }, 2000);
@@ -50,18 +62,28 @@ const AttendanceScreen = () => {
   }, []);
 
   const handleRetry = () => {
-    setRecognitionStatus('Vui lòng nhìn vào camera để điểm danh');
+    setRecognitionStatus({
+      message: 'Vui lòng nhìn vào camera để điểm danh',
+      user: '',
+      timestamp: ''
+    });
     setIsRecognizing(true);
     setTimeout(() => {
       const success = Math.random() > 0.3;
       if (success) {
-        setRecognitionStatus(`Điểm danh thành công! Chào Nguyễn Văn A - ${new Date().toLocaleString()}`);
+        setRecognitionStatus({
+          message: 'Điểm danh thành công!',
+          user: 'Nguyễn Văn A',
+          timestamp: new Date().toLocaleString()
+        });
         setFrameClass('success');
-        // successSound.play();
       } else {
-        setRecognitionStatus('Không nhận diện được, vui lòng thử lại');
+        setRecognitionStatus({
+          message: 'Không nhận diện được, vui lòng thử lại',
+          user: '',
+          timestamp: ''
+        });
         setFrameClass('fail');
-        // failSound.play();
       }
       setIsRecognizing(false);
       setTimeout(() => setFrameClass(''), 1000);
@@ -70,61 +92,77 @@ const AttendanceScreen = () => {
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === '123456') {
-      setRecognitionStatus(`Đăng nhập thành công! Chào ${username} - ${new Date().toLocaleString()}`);
-      setIsLoginModalOpen(false);
-    } else {
-      alert('Tài khoản hoặc mật khẩu không đúng!');
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    if (!employeeCode) {
+      setErrorMessage('Không được để trống mã nhân viên');
+      setIsSubmitting(false);
+      return;
     }
+
+    setTimeout(() => {
+      if (employeeCode === '123456') {
+        setRecognitionStatus({
+          message: 'Đăng nhập thành công!',
+          user: employeeCode,
+          timestamp: new Date().toLocaleString()
+        });
+        setIsLoginModalOpen(false);
+        setEmployeeCode('');
+      } else {
+        setErrorMessage('Mã nhân viên không tồn tại');
+      }
+      setIsSubmitting(false);
+    }, 1000);
   };
 
   const handleKeyPress = (key) => {
-    if (activeInput === 'username') {
-      if (key === 'Backspace') {
-        setUsername(username.slice(0, -1));
-      } else if (key === 'Space') {
-        setUsername(username + ' ');
-      } else {
-        setUsername(username + key);
-      }
-    } else if (activeInput === 'password') {
-      if (key === 'Backspace') {
-        setPassword(password.slice(0, -1));
-      } else if (key === 'Space') {
-        setPassword(password + ' ');
-      } else {
-        setPassword(password + key);
-      }
+    if (key === 'Clear') {
+      setEmployeeCode('');
+    } else if (key === 'Backspace') {
+      setEmployeeCode(employeeCode.slice(0, -1));
+    } else if (key === 'Enter') {
+      handleLoginSubmit(new Event('submit'));
+    } else {
+      setEmployeeCode(employeeCode + key);
+      setHighlight(true);
+      setTimeout(() => setHighlight(false), 200);
     }
   };
 
   const handleCloseModal = (e) => {
     if (e.target.className === 'login-modal') {
       setIsLoginModalOpen(false);
-      setActiveInput(null);
+      setEmployeeCode('');
+      setErrorMessage('');
     }
   };
 
-  const VirtualKeyboard = () => {
+  const NumericKeyboard = () => {
     const keys = [
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-      ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
-      ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-      ['z', 'x', 'c', 'v', 'b', 'n', 'm', 'Space', 'Backspace']
+      ['1', '2', '3'],
+      ['4', '5', '6'],
+      ['7', '8', '9'],
+      ['Backspace', '0', 'Clear'],
+      ['Enter']
     ];
 
     return (
-      <div className="virtual-keyboard">
+      <div className="numeric-keyboard">
         {keys.map((row, rowIndex) => (
           <div key={rowIndex} className="keyboard-row">
             {row.map((key) => (
-              <button
-                key={key}
-                className={`keyboard-key ${key === 'Backspace' || key === 'Space' ? 'special-key' : ''}`}
-                onClick={() => handleKeyPress(key)}
-              >
-                {key === 'Backspace' ? '⌫' : key === 'Space' ? '␣' : key}
-              </button>
+              <div key={key} className="key-wrapper">
+                <button
+                  className={`keyboard-key ${key === 'Backspace' || key === 'Enter' || key === 'Clear' ? 'special-key' : ''} ${key === 'Enter' ? 'enter' : ''}`}
+                  onClick={() => handleKeyPress(key)}
+                >
+                  {key === 'Backspace' ? '⌫' : key === 'Enter' ? '➜' : key === 'Clear' ? '🗑️' : key}
+                </button>
+                {key === 'Backspace' && <span className="key-label">Xóa</span>}
+                {key === 'Clear' && <span className="key-label">Xóa toàn bộ</span>}
+              </div>
             ))}
           </div>
         ))}
@@ -141,41 +179,53 @@ const AttendanceScreen = () => {
         </div>
       </div>
       <div className="status-section">
-        <p>{recognitionStatus}</p>
+        <div className="status-message">
+          <p>
+            {recognitionStatus.message === 'Điểm danh thành công!' || recognitionStatus.message === 'Đăng nhập thành công!' ? (
+              <span className="icon">✔️ </span>
+            ) : null}
+            {recognitionStatus.message}
+          </p>
+          {recognitionStatus.user && (
+            <p>
+              <span className="icon">👋 </span>
+              Chào {recognitionStatus.user}
+            </p>
+          )}
+          {recognitionStatus.timestamp && (
+            <p>
+              <span className="icon">⏰ </span>
+              {recognitionStatus.timestamp}
+            </p>
+          )}
+        </div>
       </div>
       <div className="support-buttons">
-        <button className="retry-btn" onClick={handleRetry}>Thử lại</button>
-        <button className="login-btn" onClick={() => setIsLoginModalOpen(true)}>Đăng nhập bằng tài khoản</button>
-        <button className="contact-btn">Liên hệ quản lý</button>
+        <button className="retry-btn" onClick={handleRetry}>🔁 Quét lại khuôn mặt</button>
+        <button className="login-btn" onClick={() => setIsLoginModalOpen(true)}>✍ Nhập mã thay thế</button>
       </div>
       {isLoginModalOpen && (
         <div className="login-modal" onClick={handleCloseModal}>
           <div className="modal-content">
-            <h3>Đăng nhập bằng tài khoản</h3>
+            <h3>Nhập mã nhân viên</h3>
             <form onSubmit={handleLoginSubmit}>
               <div className="form-group">
-                <label>Tài khoản:</label>
+                <label>Mã nhân viên:</label>
                 <input
                   type="text"
-                  value={username}
-                  onFocus={() => setActiveInput('username')}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={employeeCode}
+                  onChange={(e) => setEmployeeCode(e.target.value)}
                   required
+                  ref={inputRef}
+                  className={highlight ? 'highlight' : ''}
                 />
+                {errorMessage && <p className="error-message">{errorMessage}</p>}
               </div>
-              <div className="form-group">
-                <label>Mật khẩu:</label>
-                <input
-                  type="password"
-                  value={password}
-                  onFocus={() => setActiveInput('password')}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <button type="submit" className="submit-btn">Đăng nhập</button>
+              <button type="submit" className="submit-btn" disabled={isSubmitting}>
+                {isSubmitting ? <div className="spinner small"></div> : 'Đăng nhập'}
+              </button>
             </form>
-            {activeInput && <VirtualKeyboard />}
+            <NumericKeyboard />
           </div>
         </div>
       )}
